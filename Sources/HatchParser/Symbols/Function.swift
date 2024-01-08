@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftSyntax
 
 public struct Function: Symbol {
     /// Stores whether the function is throwing or not
@@ -35,6 +36,8 @@ public struct Function: Symbol {
         
         return "\(isStatic ? "static ":"")func \(name)\(genericType)(\(parameters.joined(separator: ""))) \(returnExpression)"
     }
+    
+    public var sourceRange: SourceRange
     
 }
 

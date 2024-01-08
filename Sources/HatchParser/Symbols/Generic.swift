@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftSyntax
 
 public struct Generic: Symbol {
     
@@ -13,4 +14,6 @@ public struct Generic: Symbol {
     
     public var children: [Symbol]
     public var comments: [Comment]
+    
+    public var sourceRange: SourceRange
 }

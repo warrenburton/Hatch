@@ -1,3 +1,5 @@
+import SwiftSyntax
+
 public struct Variable: Symbol {
     
     public enum LetOrVar: String, Codable {
@@ -25,11 +27,20 @@ public struct Variable: Symbol {
     
     public var description: String {
         let annotatedType = (typeAnnotation?.nilIfEmpty() == nil) ? "" : ": \(typeAnnotation ?? "")"
-        let xinitializer = (initializer?.nilIfEmpty() == nil) ? "": initializer ?? ""
-        let expression = identifierExpression ?? " = \(xinitializer)"
+        
+        let xinitializer: String
+        if let initializer, !initializer.isEmpty {
+            xinitializer = "= \(initializer)"
+        } else {
+            xinitializer = ""
+        }
+        
+        let expression = identifierExpression ?? xinitializer
         
         return "\(isStatic ? "static":"") \(letOrVar.rawValue ) \(name)\(annotatedType)\(expression)"
     }
+    
+    public var sourceRange: SourceRange
 }
 
 extension String {

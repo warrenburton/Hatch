@@ -7,18 +7,23 @@ open class SymbolParser: SyntaxVisitor {
     // MARK: - Private
 
     private var scope: Scope = .root(symbols: [])
+    
+    private var sourceLocationConverter: SourceLocationConverter!
+    private var file: String
 
     // MARK: - Public
 
     /// Parses `source` and returns a hierarchical list of symbols from a string
-    static public func parse(source: String) throws -> [Symbol] {
-        let visitor = Self()
+    static public func parse(file: String, source: String) throws -> [Symbol] {
+        let visitor = Self(file: file)
+        visitor.sourceLocationConverter = SourceLocationConverter(file: file, source: source)
         try visitor.walk(SyntaxParser.parse(source: source))
         return visitor.scope.symbols
     }
 
     /// Designated initializer
-    required public init() {
+    required public init(file: String) {
+        self.file = file
         super.init(viewMode: .sourceAccurate)
     }
 
@@ -48,7 +53,8 @@ open class SymbolParser: SyntaxVisitor {
                 name: node.identifier.text,
                 children: children,
                 inheritedTypes: node.inheritanceClause?.types ?? [],
-                comments: comments(node.leadingTrivia)
+                comments: comments(node.leadingTrivia),
+                sourceRange: node.sourceRange(converter: sourceLocationConverter)
             )
         }
     }
@@ -63,7 +69,8 @@ open class SymbolParser: SyntaxVisitor {
                 name: node.identifier.text,
                 children: children,
                 inheritedTypes: node.inheritanceClause?.types ?? [],
-                comments: comments(node.leadingTrivia)
+                comments: comments(node.leadingTrivia),
+                sourceRange: node.sourceRange(converter: sourceLocationConverter)
             )
         }
     }
@@ -78,7 +85,8 @@ open class SymbolParser: SyntaxVisitor {
                 name: node.identifier.text,
                 children: children,
                 inheritedTypes: node.inheritanceClause?.types ?? [],
-                comments: comments(node.leadingTrivia)
+                comments: comments(node.leadingTrivia),
+                sourceRange: node.sourceRange(converter: sourceLocationConverter)
             )
         }
     }
@@ -93,7 +101,8 @@ open class SymbolParser: SyntaxVisitor {
                 name: node.identifier.text,
                 children: children,
                 inheritedTypes: node.inheritanceClause?.types ?? [],
-                comments: comments(node.leadingTrivia)
+                comments: comments(node.leadingTrivia),
+                sourceRange: node.sourceRange(converter: sourceLocationConverter)
             )
         }
     }
@@ -106,7 +115,8 @@ open class SymbolParser: SyntaxVisitor {
         endScopeAndAddSymbol { children in
             EnumCase(
                 caseDeclarations: children,
-                comments: comments(node.leadingTrivia)
+                comments: comments(node.leadingTrivia),
+                sourceRange: node.sourceRange(converter: sourceLocationConverter)
             )
         }
     }
@@ -120,7 +130,8 @@ open class SymbolParser: SyntaxVisitor {
             EnumCaseElement(
                 name: node.identifier.text,
                 children: children,
-                comments: comments(node.leadingTrivia)
+                comments: comments(node.leadingTrivia),
+                sourceRange: node.sourceRange(converter: sourceLocationConverter)
             )
         }
     }
@@ -134,7 +145,8 @@ open class SymbolParser: SyntaxVisitor {
             Typealias(
                 name: node.identifier.text,
                 existingType: node.initializer.value.withoutTrivia().description,
-                comments: comments(node.leadingTrivia)
+                comments: comments(node.leadingTrivia),
+                sourceRange: node.sourceRange(converter: sourceLocationConverter)
             )
         }
     }
@@ -149,13 +161,14 @@ open class SymbolParser: SyntaxVisitor {
                 name: node.extendedType.withoutTrivia().description,
                 children: children,
                 inheritedTypes: node.inheritanceClause?.types ?? [],
-                comments: []
+                comments: [],
+                sourceRange: node.sourceRange(converter: sourceLocationConverter)
             )
         }
     }
     
     open override func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
-        print("* VariableDeclSyntax")
+        //print("* VariableDeclSyntax")
         return startScope()
     }
     
@@ -193,7 +206,8 @@ open class SymbolParser: SyntaxVisitor {
                     letOrVar: letOrVar,
                     typeAnnotation: binding.typeAnnotation?.type.description,
                     identifierExpression: nil,
-                    initializer: binding.initializer?.value.description
+                    initializer: binding.initializer?.value.description,
+                    sourceRange: node.sourceRange(converter: sourceLocationConverter)
                 )
                 return newObject
             }
@@ -238,7 +252,7 @@ open class SymbolParser: SyntaxVisitor {
     
     
     open override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
-        print("* FunctionCallExprSyntax")
+        //print("* FunctionCallExprSyntax")
         return .visitChildren
     }
     open override func visit(_ node: FunctionParameterListSyntax) -> SyntaxVisitorContinueKind {
@@ -288,7 +302,8 @@ open class SymbolParser: SyntaxVisitor {
             let newObject = Generic(
                 name: name,
                 children: children,
-                comments: []
+                comments: [],
+                sourceRange: node.sourceRange(converter: sourceLocationConverter)
             )
             
             return newObject
@@ -354,7 +369,8 @@ open class SymbolParser: SyntaxVisitor {
                 throwingStatus: throwingStatus,
                 returnType: returnType,
                 children: children,
-                comments: comments(node.leadingTrivia)
+                comments: comments(node.leadingTrivia),
+                sourceRange: node.sourceRange(converter: sourceLocationConverter)
             )
             return newObject
         }
