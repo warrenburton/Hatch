@@ -246,7 +246,7 @@ open class SymbolParser: SyntaxVisitor {
     
     /// Triggered on entering a function
     open override func visit(_ node: FunctionDeclSyntax) -> SyntaxVisitorContinueKind {
-        print("* FunctionDeclSyntax")
+        //print("* FunctionDeclSyntax")
         return startScope()
     }
     
@@ -256,42 +256,42 @@ open class SymbolParser: SyntaxVisitor {
         return .visitChildren
     }
     open override func visit(_ node: FunctionParameterListSyntax) -> SyntaxVisitorContinueKind {
-        print("* FunctionParameterListSyntax")
+        //print("* FunctionParameterListSyntax")
         return .visitChildren
     }
     open override func visit(_ node: FunctionSignatureSyntax) -> SyntaxVisitorContinueKind {
-        print("* FunctionSignatureSyntax")
+        //print("* FunctionSignatureSyntax")
         return .visitChildren
     }
     open override func visit(_ node: FunctionParameterSyntax) -> SyntaxVisitorContinueKind {
-        print("* FunctionParameterSyntax")
+        //print("* FunctionParameterSyntax")
         return .visitChildren
     }
     
     open override func visit(_ node: FunctionDeclNameSyntax) -> SyntaxVisitorContinueKind {
-        print("* FunctionDeclNameSyntax")
+        //print("* FunctionDeclNameSyntax")
         return .visitChildren
     }
     open override func visit(_ node: FunctionTypeSyntax) -> SyntaxVisitorContinueKind {
-        print("* FunctionTypeSyntax")
+        //print("* FunctionTypeSyntax")
         return .visitChildren
     }
                                                                                                    
     open override func visitPost(_ node: GenericWhereClauseSyntax) {
-        print("* GenericWhereClauseSyntax")
+        //print("* GenericWhereClauseSyntax")
     }
     open override func visitPost(_ node: GenericRequirementListSyntax) {
-        print("* GenericRequirementListSyntax")
+        //print("* GenericRequirementListSyntax")
     }
     open override func visitPost(_ node: GenericRequirementSyntax) {
-        print("* GenericRequirementSyntax")
+        //print("* GenericRequirementSyntax")
     }
     open override func visitPost(_ node: GenericParameterListSyntax) {
-        print("* GenericParameterListSyntax")
+        //print("* GenericParameterListSyntax")
     }
     
     open override func visit(_ node: GenericParameterSyntax) -> SyntaxVisitorContinueKind{
-        print("* GenericParameterSyntax")
+        //print("* GenericParameterSyntax")
         return startScope()
     }
     
@@ -311,16 +311,16 @@ open class SymbolParser: SyntaxVisitor {
     }
     
     open override func visitPost(_ node: GenericParameterClauseSyntax) {
-        print("* GenericParameterClauseSyntax")
+        //print("* GenericParameterClauseSyntax")
     }
     open override func visitPost(_ node: GenericArgumentListSyntax) {
-        print("* GenericArgumentListSyntax")
+        //print("* GenericArgumentListSyntax")
     }
     open override func visitPost(_ node: GenericArgumentSyntax) {
-        print("* GenericArgumentSyntax")
+        //print("* GenericArgumentSyntax")
     }
     open override func visitPost(_ node: GenericArgumentClauseSyntax) {
-        print("* GenericArgumentClauseSyntax")
+        //print("* GenericArgumentClauseSyntax")
     }
     
 
