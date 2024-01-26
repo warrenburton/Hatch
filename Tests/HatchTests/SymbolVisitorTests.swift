@@ -1,5 +1,5 @@
 import XCTest
-@testable import HatchParser
+@testable import Hatch
 
 final class SymbolVisitorTests: XCTestCase {
 
@@ -9,7 +9,7 @@ final class SymbolVisitorTests: XCTestCase {
         }
         """
 
-        let structs = try SymbolParser.parse(source: code)
+        let structs = SymbolParser.parse(source: code)
             .compactMap { $0 as? Struct }
 
         XCTAssertEqual(structs.count, 1)
@@ -24,7 +24,7 @@ final class SymbolVisitorTests: XCTestCase {
         }
         """
 
-        let symbols = try SymbolParser.parse(source: code)
+        let symbols = SymbolParser.parse(source: code)
             .flattened()
 
         let structs = symbols
@@ -42,7 +42,7 @@ final class SymbolVisitorTests: XCTestCase {
         }
         """
 
-        let structs = try SymbolParser.parse(source: code)
+        let structs = SymbolParser.parse(source: code)
             .compactMap { $0 as? Struct }
 
         XCTAssertEqual(structs.count, 1)
@@ -55,7 +55,7 @@ final class SymbolVisitorTests: XCTestCase {
         }
         """
 
-        let structs = try SymbolParser.parse(source: code)
+        let structs = SymbolParser.parse(source: code)
             .compactMap { $0 as? Struct }
 
         XCTAssertEqual(structs.count, 1)
@@ -69,7 +69,7 @@ final class SymbolVisitorTests: XCTestCase {
         }
         """
 
-        let classes = try SymbolParser.parse(source: code)
+        let classes = SymbolParser.parse(source: code)
             .compactMap { $0 as? Class }
 
         XCTAssertEqual(classes.count, 1)
@@ -84,7 +84,7 @@ final class SymbolVisitorTests: XCTestCase {
         }
         """
 
-        let symbols = try SymbolParser.parse(source: code)
+        let symbols = SymbolParser.parse(source: code)
             .flattened()
 
         let classes = symbols
@@ -102,7 +102,7 @@ final class SymbolVisitorTests: XCTestCase {
         }
         """
 
-        let classes = try SymbolParser.parse(source: code)
+        let classes = SymbolParser.parse(source: code)
             .compactMap { $0 as? Class }
 
         XCTAssertEqual(classes.count, 1)
@@ -120,7 +120,7 @@ final class SymbolVisitorTests: XCTestCase {
         }
         """
 
-        let enums = try SymbolParser.parse(source: code)
+        let enums = SymbolParser.parse(source: code)
             .compactMap { $0 as? Enum }
 
         let cases = enums.first?.children.flattened()
@@ -141,7 +141,7 @@ final class SymbolVisitorTests: XCTestCase {
         }
         """
 
-        let enums = try SymbolParser.parse(source: code)
+        let enums = SymbolParser.parse(source: code)
             .compactMap { $0 as? Enum }
 
         let cases = enums.first?.children.flattened()
@@ -161,7 +161,7 @@ final class SymbolVisitorTests: XCTestCase {
         }
         """
 
-        let enums = try SymbolParser.parse(source: code)
+        let enums = SymbolParser.parse(source: code)
             .compactMap { $0 as? Enum }
 
         XCTAssertEqual(enums.count, 1)
@@ -179,7 +179,7 @@ final class SymbolVisitorTests: XCTestCase {
         }
         """
 
-        let enums = try SymbolParser.parse(source: code)
+        let enums = SymbolParser.parse(source: code)
             .flattened()
             .compactMap { $0 as? Enum }
 
@@ -196,7 +196,7 @@ final class SymbolVisitorTests: XCTestCase {
         }
         """
 
-        let protocols = try SymbolParser.parse(source: code)
+        let protocols = SymbolParser.parse(source: code)
             .compactMap { $0 as? ProtocolType }
 
         XCTAssertEqual(protocols.count, 1)
@@ -208,7 +208,7 @@ final class SymbolVisitorTests: XCTestCase {
         protocol MyProtocol: Hashable, Error {}
         """
 
-        let protocols = try SymbolParser.parse(source: code)
+        let protocols = SymbolParser.parse(source: code)
             .compactMap { $0 as? ProtocolType }
 
         XCTAssertEqual(protocols.count, 1)
@@ -221,7 +221,7 @@ final class SymbolVisitorTests: XCTestCase {
         typealias MyAlias = Int
         """
 
-        let aliases = try SymbolParser.parse(source: code)
+        let aliases = SymbolParser.parse(source: code)
             .compactMap { $0 as? Typealias }
 
         XCTAssertEqual(aliases.count, 1)
@@ -234,7 +234,7 @@ final class SymbolVisitorTests: XCTestCase {
         typealias MyAlias = StringProtocol & View
         """
 
-        let aliases = try SymbolParser.parse(source: code)
+        let aliases = SymbolParser.parse(source: code)
             .compactMap { $0 as? Typealias }
 
         XCTAssertEqual(aliases.count, 1)
@@ -249,7 +249,7 @@ final class SymbolVisitorTests: XCTestCase {
         }
         """
 
-        let aliases = try SymbolParser.parse(source: code)
+        let aliases = SymbolParser.parse(source: code)
             .flattened()
             .compactMap { $0 as? Typealias }
 
@@ -264,11 +264,72 @@ final class SymbolVisitorTests: XCTestCase {
         }
         """
 
-        let extensions = try SymbolParser.parse(source: code)
+        let extensions = SymbolParser.parse(source: code)
             .compactMap { $0 as? Extension }
 
         XCTAssertEqual(extensions.count, 1)
         XCTAssertEqual(extensions.first?.name, "String")
         XCTAssertEqual(extensions.first?.inheritedTypes.first, "MyProtocol")
     }
+    
+    func testExtractingActor() throws {
+          let code = """
+          actor MyActor {
+          }
+          """
+
+          let actors = SymbolParser.parse(source: code)
+              .compactMap { $0 as? Actor }
+
+          XCTAssertEqual(actors.count, 1)
+          XCTAssertEqual(actors.first?.name, "MyActor")
+      }
+
+      func testExtractingNestedActor() throws {
+          let code = """
+          enum MyEnum {
+            actor MyNestedActorA {}
+            actor MyNestedActorB {}
+          }
+          """
+
+          let symbols = SymbolParser.parse(source: code)
+              .flattened()
+
+          let actors = symbols
+              .compactMap { $0 as? Actor }
+
+          XCTAssertEqual(symbols.count, 3)
+          XCTAssertEqual(actors.count, 2)
+          XCTAssertEqual(actors[0].name, "MyNestedActorA")
+          XCTAssertEqual(actors[1].name, "MyNestedActorB")
+      }
+
+      func testExtractingGenericActor() throws {
+          let code = """
+          actor MyActor<T> where T: StringProtocol {
+          }
+          """
+
+          let actors = SymbolParser.parse(source: code)
+              .compactMap { $0 as? Actor }
+
+          XCTAssertEqual(actors.count, 1)
+          XCTAssertEqual(actors.first?.name, "MyActor")
+      }
+
+      
+      func testExtractingInheritingActor() throws {
+          let code = """
+          actor MyActor: Error, Sendable {
+          }
+          """
+
+          let actors = SymbolParser.parse(source: code)
+              .compactMap { $0 as? Actor }
+
+          XCTAssertEqual(actors.count, 1)
+          XCTAssertEqual(actors.first?.name, "MyActor")
+          XCTAssertEqual(actors.first?.inheritedTypes, ["Error", "Sendable"])
+      }
 }

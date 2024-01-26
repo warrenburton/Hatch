@@ -6,46 +6,29 @@ import Foundation
 
 let package = Package(
     name: "Hatch",
-    platforms: [.iOS(.v13), .macOS(.v10_15)],
+    platforms: [
+        .macOS(.v10_15),
+        .iOS(.v13),
+        .tvOS(.v13),
+        .watchOS(.v6),
+        .macCatalyst(.v13),
+    ],
     products: [
         .executable(name: "HatchExample", targets: ["HatchExample"]),
-        .library(name: "HatchParser", targets: ["HatchParser"]),
-        .library(name: "HatchBuilder", targets: ["HatchBuilder"]),
+        .library(name: "Hatch", targets: ["Hatch"]),
     ],
     dependencies: [
-        .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", from: "508.0.0")
+        .package(name: "swift-syntax", url: "https://github.com/apple/swift-syntax.git", from: "509.0.2")
     ],
     targets: [
-        .executableTarget(
-            name: "HatchExample",
+        .executableTarget(name: "HatchExample", dependencies: [.target(name: "Hatch")]),
+        .target(
+            name: "Hatch",
             dependencies: [
-                .target(name: "HatchParser"),
-                .target(name: "HatchBuilder")
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+                .product(name: "SwiftParser", package: "swift-syntax")
             ]
         ),
-        .target(
-            name: "HatchParser",
-            dependencies: [
-                .product(name: "SwiftSyntax", package: "SwiftSyntax"),
-                .product(name: "SwiftSyntaxParser", package: "SwiftSyntax")
-            ]
-        ),
-        .target(
-            name: "HatchBuilder"
-        ),
-
-        .testTarget(
-            name: "HatchParserTests",
-            dependencies: ["HatchParser"]
-        )
+        .testTarget(name: "HatchTests", dependencies: ["Hatch"])
     ]
 )
-
-#if swift(>=5.6)
-if ProcessInfo.processInfo.environment["CI"] == "true" {
-    package.dependencies += [
-        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
-    ]
-}
-#endif
-

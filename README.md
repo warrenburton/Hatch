@@ -1,18 +1,24 @@
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fsdidla%2FHatch%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/sdidla/Hatch)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fsdidla%2FHatch%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/sdidla/Hatch)
 [![GitHub license](https://img.shields.io/github/license/sdidla/Hatch)](https://github.com/sdidla/Hatch/blob/main/LICENSE)
-![CircleCI](https://img.shields.io/circleci/build/github/sdidla/Hatch?label=build%2C%20test%20and%20document)
+[![Tests](https://github.com/sdidla/Hatch/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/sdidla/Hatch/actions/workflows/unit-tests.yml)
 
 # Hatch
 
-Generate Swift using Swift.
-
-This package contains two modules:
-- `HatchParser` Provides a simple, extensible parser to to get a hierarchical list of symbols from swift code using [SwiftSyntax](https://github.com/apple/swift-syntax)
-- `HatchBuilder` Provides a string concatenating `resultBuidler` so expressions can be interspersed with strings 
+A simple, extensible parser to to get a hierarchical list of symbols from swift code using [SwiftSyntax](https://github.com/apple/swift-syntax)
 
 ## Documentation
 
-- [`HatchParser`](https://sdidla.github.io/Hatch/docs/HatchParser/documentation/hatchparser/)
-   
+- [Hatch Documentation](https://swiftpackageindex.com/sdidla/Hatch/main/documentation/hatch)
+
+## Usage
+
+When using Swift Package Manager, add the following to your package dependencies in the `Package.swift` file:
+
+```swift
+  .package(url: "https://github.com/sdidla/Hatch.git", from: "<#latest swift-syntax tag#>")
+```
+
 ## Releases
 
 Hatch [releases](https://github.com/sdidla/Hatch/releases/) correspond to releases of [SwiftSyntax](https://github.com/apple/swift-syntax)
@@ -20,7 +26,7 @@ Hatch [releases](https://github.com/sdidla/Hatch/releases/) correspond to releas
 ## Example
 
 ```swift
-import HatchParser
+import Hatch
 
 let source: String = <some swift code>
 let symbols = SymbolParser.parse(source: source)
@@ -55,49 +61,48 @@ Output:
 
 ```
 ▿ 3 elements
-  ▿ HatchParser.Struct
+  ▿ Hatch.Struct
     - name: "A1"
     ▿ children: 3 elements
-      ▿ HatchParser.Struct
+      ▿ Hatch.Struct
         - name: "BC"
         ▿ children: 3 elements
-          ▿ HatchParser.Struct
+          ▿ Hatch.Struct
             - name: "C1"
             - children: 0 elements
             - inheritedTypes: 0 elements
-          ▿ HatchParser.Struct
+          ▿ Hatch.Struct
             - name: "C2"
             - children: 0 elements
             - inheritedTypes: 0 elements
-          ▿ HatchParser.Struct
+          ▿ Hatch.Struct
             - name: "C3"
             - children: 0 elements
             - inheritedTypes: 0 elements
         - inheritedTypes: 0 elements
-      ▿ HatchParser.Struct
+      ▿ Hatch.Struct
         - name: "BD"
         ▿ children: 2 elements
-          ▿ HatchParser.Struct
+          ▿ Hatch.Struct
             - name: "D1"
             - children: 0 elements
             - inheritedTypes: 0 elements
-          ▿ HatchParser.Struct
+          ▿ Hatch.Struct
             - name: "D2"
             - children: 0 elements
             - inheritedTypes: 0 elements
         - inheritedTypes: 0 elements
-      ▿ HatchParser.Struct
+      ▿ Hatch.Struct
         - name: "BX"
         - children: 0 elements
         - inheritedTypes: 0 elements
     - inheritedTypes: 0 elements
-  ▿ HatchParser.Struct
+  ▿ Hatch.Struct
     - name: "A2"
     - children: 0 elements
     - inheritedTypes: 0 elements
-  ▿ HatchParser.Enum
+  ▿ Hatch.Enum
     - name: "MyEnum"
     - children: 0 elements
     - inheritedTypes: 0 elements
-
 ```
