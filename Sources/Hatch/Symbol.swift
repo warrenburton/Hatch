@@ -44,6 +44,8 @@ public struct Actor: Symbol, InheritingSymbol  {
     public let name: String
     public let children: [Symbol]
     public let inheritedTypes: [String]
+    public var comments: [Comment]
+    public var sourceRange: SwiftSyntax.SourceRange
 }
 
 /// A swift struct
