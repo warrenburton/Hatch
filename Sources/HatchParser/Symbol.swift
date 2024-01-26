@@ -94,4 +94,11 @@ public struct Extension: Symbol, InheritingSymbol  {
     public var sourceRange: SourceRange
 }
 
+/// Catch all case
+public struct Mystery: Symbol {
+    public let name: String
+    public var children: [Symbol]
+    public var comments: [Comment]
+    public var sourceRange: SwiftSyntax.SourceRange
+}
 

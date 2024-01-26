@@ -47,7 +47,8 @@ The following listing shows an example of adding generic where clause support:
 class MySpecialVisitor: SymbolParser {
     override func visitPost(_ node: StructDeclSyntax) {
         if let genericWhereClause = node.genericWhereClause {
-            endScopeAndAddSymbol { children in
+            
+endScopeAndAddSymbol { children in
                 MySpecialStruct(
                     name: node.identifier.text,
                     children: children,

@@ -18,7 +18,7 @@ public struct Function: Symbol {
     public let name: String
 
     /// The parameter names received by the function
-    public let parameters: [String]
+    public let parameters: [FunctionParameter]
 
     /// Whether the function is static or not
     public let isStatic: Bool
@@ -33,8 +33,8 @@ public struct Function: Symbol {
     public var comments: [Comment]
     
     public var description: String {
-        
-        return "\(isStatic ? "static ":"")func \(name)\(genericType)(\(parameters.joined(separator: ""))) \(returnExpression)"
+        let displayParameters = parameters.map { $0.description }.joined(separator: ", ")
+        return "\(isStatic ? "static ":"")func \(name)\(genericType)(\(displayParameters)) \(returnExpression)"
     }
     
     public var sourceRange: SourceRange
@@ -62,3 +62,25 @@ extension Function {
         return "-> \(returnType)"
     }
 }
+
+public struct FunctionParameter: Symbol {
+    public var firstName: String
+    public var secondName: String?
+    public var type: String
+    
+    public var children: [Symbol]
+    public var comments: [Comment]
+    public var sourceRange: SwiftSyntax.SourceRange
+    
+    public var description: String {
+        var name = firstName
+        if let secondName {
+            name += " " + secondName
+        }
+        name += ": " + type
+        return name
+    }
+    
+}
+
+

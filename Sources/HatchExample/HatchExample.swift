@@ -87,7 +87,8 @@ class MyProjectVisitor: SymbolParser {
             return
         }
 
-        endScopeAndAddSymbol { children in
+        
+endScopeAndAddSymbol { children in
             MySpecialStruct(
                 name: node.identifier.text,
                 children: children,

@@ -18,10 +18,12 @@ indirect enum Scope {
     /// The children provided in the closure are the symbols in the scope to be ended
     mutating func end(makeSymbolWithChildrenInScope: (_ children: [Symbol]) -> Symbol) {
         let newSymbol = makeSymbolWithChildrenInScope(symbols)
+        
+        print("xxx end \("\(newSymbol)".prefix(80))")
 
         switch self {
         case .root:
-            fatalError("Unbalanced calls to start() and end(_:)")
+            fatalError("Unbalanced calls to start() and end(_:) at \(newSymbol)")
 
         case .nested(.root(let rootSymbols), _):
             self = .root(symbols: rootSymbols + [newSymbol])
