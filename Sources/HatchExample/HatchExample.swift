@@ -1,6 +1,5 @@
 import Foundation
-import HatchParser
-import HatchBuilder
+import Hatch
 import SwiftSyntax
 
 @main
@@ -31,7 +30,7 @@ public struct ExampleApp {
         
         """
         
-        let symbols = try SymbolParser.parse(source: source)
+        let symbols = SymbolParser.parse(fileName: "example.swift", source: source)
             .flattened()
             .compactMap { $0 as? InheritingSymbol }
         
@@ -45,7 +44,7 @@ public struct ExampleApp {
             .compactMap { $0 as? URL }
             .filter { $0.hasDirectoryPath == false }
             .filter { $0.pathExtension == "swift" }
-            .flatMap { try SymbolParser.parse(source: String(contentsOf: $0)) }
+            .flatMap { try SymbolParser.parse(fileName: "example.swift", source: String(contentsOf: $0)) }
         
         dump(allSymbols)
         
@@ -90,8 +89,23 @@ class MyProjectVisitor: SymbolParser {
         
         endScopeAndAddSymbol { children in
             MySpecialStruct(
-                name: node.identifier.text,
+                name: node.name.text,
                 children: children,
+                comments: [],
+                sourceRange: SourceRange(
+                    start: SourceLocation(
+                        line: 1,
+                        column: 0,
+                        offset: 0,
+                        file: "foo"
+                    ),
+                    end: SourceLocation(
+                        line: 2,
+                        column: 0,
+                        offset: 0,
+                        file: "foo"
+                    )
+                ),
                 genericWhereClause: genericWhereClause.description
             )
         }
@@ -101,6 +115,9 @@ class MyProjectVisitor: SymbolParser {
 struct MySpecialStruct: Symbol {
     let name: String
     let children: [Symbol]
+    var comments: [Hatch.Comment]
+    var sourceRange: SwiftSyntax.SourceRange
+    
     let genericWhereClause: String
 }
 

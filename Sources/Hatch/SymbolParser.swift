@@ -12,8 +12,9 @@ open class SymbolParser: SyntaxVisitor {
     // MARK: - Public
     
     /// Parses `source` and returns a hierarchical list of symbols from a string
-    static public func parse(source: String) -> [Symbol] {
+    static public func parse(fileName: String, source: String) -> [Symbol] {
         let visitor = Self()
+        visitor.sourceLocationConverter = SourceLocationConverter(file: fileName, source: source)
         visitor.walk(Parser.parse(source: source))
         return visitor.scope.symbols
     }
@@ -332,6 +333,23 @@ open class SymbolParser: SyntaxVisitor {
             )
             return newObject
         }
+    }
+    
+    open override func visit(_ node: FunctionParameterSyntax) -> SyntaxVisitorContinueKind { startScope() }
+    open override func visitPost(_ node: FunctionParameterSyntax) {
+        
+        endScopeAndAddSymbol { children in
+            let newObject = FunctionParameter(
+                firstName: node.firstName.text,
+                secondName: node.secondName?.text,
+                type: node.type.description,
+                children: children,
+                comments: comments(node.leadingTrivia),
+                sourceRange: node.sourceRange(converter: sourceLocationConverter)
+            )
+            return newObject
+        }
+        
     }
 
 }
