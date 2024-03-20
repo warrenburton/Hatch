@@ -219,18 +219,24 @@ open class SymbolParser: SyntaxVisitor {
         }
     }
     
-    
-    
     /// Reads all leading trivia for a node, discards everything that isn't a comment, then
     /// sends back an array of what's left.
     func comments(_ trivia: Trivia?) -> [Comment] {
-        var comments = [Comment]()
-        
-        if let extractedComments = trivia?.compactMap(extractComments).flatMap({ $0 }) {
-            comments = extractedComments
+        guard let trivia else {
+            return []
         }
         
-        return comments
+        var target: [Comment] = []
+        
+        // walk backwards till first empty line break
+        for piece in trivia.reversed() {
+            if case let .newlines(count) = piece, count > 1 {
+                break
+            }
+            target.append(contentsOf: extractComments(from: piece).reversed())
+        }
+        
+        return target.reversed()
     }
     
     /// Converts trivia to comments
@@ -290,14 +296,14 @@ open class SymbolParser: SyntaxVisitor {
         }
         
         // Copy in the throwing status
-        print("** \(node.signature.effectSpecifiers)")
-//        if let throwsKeyword = node.signature.effectSpecifiers?.throwsClause {
-//            if let throwsOrRethrows = Function.ThrowingStatus(rawValue: throwsKeyword.description) {
-//                throwingStatus = throwsOrRethrows
-//            }
-//        } else {
+        if let throwsKeyword = node.signature.effectSpecifiers?.throwsSpecifier {
+            if let throwsOrRethrows = Function.ThrowingStatus(rawValue: throwsKeyword.description) {
+                //print("&& imma let you throw")
+                throwingStatus = throwsOrRethrows
+            }
+       } else {
             throwingStatus = .none
-//        }
+        }
         
         let name = node.name.text
         

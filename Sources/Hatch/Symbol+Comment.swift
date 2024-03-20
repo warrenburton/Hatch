@@ -6,7 +6,9 @@
 //
 
 import Foundation
+import SwiftSyntax
 
+/// a single comment line
 public struct Comment {
     public enum CommentType: String {
         case regular

@@ -63,7 +63,11 @@ extension Function {
     }
 }
 
-public struct FunctionParameter: Symbol {
+public struct FunctionParameter: Symbol, Identifiable {
+    public var id: String {
+        description
+    }
+    
     public var firstName: String
     public var secondName: String?
     public var type: String
@@ -71,6 +75,10 @@ public struct FunctionParameter: Symbol {
     public var children: [Symbol]
     public var comments: [Comment]
     public var sourceRange: SwiftSyntax.SourceRange
+    
+    public var resolvedName: String {
+        return secondName ?? firstName
+    }
     
     public var description: String {
         var name = firstName
