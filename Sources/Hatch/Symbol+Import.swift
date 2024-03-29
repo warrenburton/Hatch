@@ -8,5 +8,7 @@ public struct Import: Symbol {
     public var children: [Symbol]
     public var comments: [Comment]
     public var sourceRange: SwiftSyntax.SourceRange
+    public let modifiers: [String] = []
+    public var attributes: [String] = []
     
 }

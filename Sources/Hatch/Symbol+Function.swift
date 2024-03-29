@@ -1,7 +1,4 @@
 //
-//  File.swift
-//  
-//
 //  Created by Warren Burton on 14/05/2023.
 //
 
@@ -9,11 +6,7 @@ import Foundation
 import SwiftSyntax
 
 public struct Function: Symbol {
-    /// Stores whether the function is throwing or not
-    public enum ThrowingStatus: String {
-        case none, `throws`, `rethrows`, unknown
-    }
-    
+   
     /// The function name
     public let name: String
 
@@ -21,7 +14,9 @@ public struct Function: Symbol {
     public let parameters: [FunctionParameter]
 
     /// Whether the function is static or not
-    public let isStatic: Bool
+    public var isStatic: Bool {
+        modifiers.contains("static") || modifiers.contains("class")
+    }
 
     /// Whether the function throws errors or not
     public let throwingStatus: ThrowingStatus
@@ -31,6 +26,9 @@ public struct Function: Symbol {
     
     public var children: [Symbol]
     public var comments: [Comment]
+    public var modifiers: [String]
+    public var attributes: [String]
+    public var isInitializer: Bool = false
     
     public var description: String {
         let displayParameters = parameters.map { $0.description }.joined(separator: ", ")
@@ -71,10 +69,13 @@ public struct FunctionParameter: Symbol, Identifiable {
     public var firstName: String
     public var secondName: String?
     public var type: String
+    public var initializerClause: String? = nil
     
     public var children: [Symbol]
     public var comments: [Comment]
     public var sourceRange: SwiftSyntax.SourceRange
+    public var modifiers: [String] = []
+    public var attributes: [String] = []
     
     public var resolvedName: String {
         return secondName ?? firstName
@@ -89,6 +90,10 @@ public struct FunctionParameter: Symbol, Identifiable {
         return name
     }
     
+    public var defaultValue: String? {
+        let cset = CharacterSet(charactersIn: " =")
+        return initializerClause?.trimmingCharacters(in: cset)
+    }
 }
 
 

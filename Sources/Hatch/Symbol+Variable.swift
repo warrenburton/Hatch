@@ -10,8 +10,13 @@ public struct Variable: Symbol {
     public let name: String
     public let children: [Symbol]
     public let comments: [Comment]
+    public var modifiers: [String]
+    public var attributes: [String]
     
-    public let isStatic: Bool
+    /// Whether the var is static or not
+    public var isStatic: Bool {
+        modifiers.contains("static") || modifiers.contains("class")
+    }
     
     /// Is let or var
     public let letOrVar: LetOrVar

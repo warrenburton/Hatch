@@ -52,7 +52,9 @@ open class SymbolParser: SyntaxVisitor {
                 children: children,
                 inheritedTypes: node.inheritanceClause?.types ?? [],
                 comments: comments(node.leadingTrivia),
-                sourceRange: node.sourceRange(converter: sourceLocationConverter)
+                sourceRange: node.sourceRange(converter: sourceLocationConverter),
+                modifiers: node.modifiers.map({ $0.name.text }),
+                attributes: node.attributes.map({ $0.trimmedDescription })
             )
         }
     }
@@ -69,7 +71,9 @@ open class SymbolParser: SyntaxVisitor {
                 children: children,
                 inheritedTypes: node.inheritanceClause?.types ?? [],
                 comments: comments(node.leadingTrivia),
-                sourceRange: node.sourceRange(converter: sourceLocationConverter)
+                sourceRange: node.sourceRange(converter: sourceLocationConverter),
+                modifiers: node.modifiers.map({ $0.name.text }),
+                attributes: node.attributes.map({ $0.trimmedDescription })
             )
         }
     }
@@ -86,7 +90,9 @@ open class SymbolParser: SyntaxVisitor {
                 children: children,
                 inheritedTypes: node.inheritanceClause?.types ?? [],
                 comments: comments(node.leadingTrivia),
-                sourceRange: node.sourceRange(converter: sourceLocationConverter)
+                sourceRange: node.sourceRange(converter: sourceLocationConverter),
+                modifiers: node.modifiers.map({ $0.name.text }),
+                attributes: node.attributes.map({ $0.trimmedDescription })
             )
         }
     }
@@ -103,7 +109,9 @@ open class SymbolParser: SyntaxVisitor {
                 children: children,
                 inheritedTypes: node.inheritanceClause?.types ?? [],
                 comments: comments(node.leadingTrivia),
-                sourceRange: node.sourceRange(converter: sourceLocationConverter)
+                sourceRange: node.sourceRange(converter: sourceLocationConverter),
+                modifiers: node.modifiers.map({ $0.name.text }),
+                attributes: node.attributes.map({ $0.trimmedDescription })
             )
         }
     }
@@ -118,7 +126,9 @@ open class SymbolParser: SyntaxVisitor {
             EnumCase(
                 caseDeclarations: children,
                 comments: comments(node.leadingTrivia),
-                sourceRange: node.sourceRange(converter: sourceLocationConverter)
+                sourceRange: node.sourceRange(converter: sourceLocationConverter),
+                modifiers: node.modifiers.map({ $0.name.text }),
+                attributes: node.attributes.map({ $0.trimmedDescription })
             )
         }
     }
@@ -150,7 +160,8 @@ open class SymbolParser: SyntaxVisitor {
                 name: node.name.text,
                 existingType: node.initializer.value.description,
                 comments: comments(node.leadingTrivia),
-                sourceRange: node.sourceRange(converter: sourceLocationConverter)
+                sourceRange: node.sourceRange(converter: sourceLocationConverter),
+                modifiers: node.modifiers.map({ $0.name.text })
             )
         }
     }
@@ -167,7 +178,9 @@ open class SymbolParser: SyntaxVisitor {
                 children: children,
                 inheritedTypes: node.inheritanceClause?.types ?? [],
                 comments: [],
-                sourceRange: node.sourceRange(converter: sourceLocationConverter)
+                sourceRange: node.sourceRange(converter: sourceLocationConverter),
+                modifiers: node.modifiers.map({ $0.name.text }),
+                attributes: node.attributes.map({ $0.trimmedDescription })
             )
         }
     }
@@ -177,16 +190,6 @@ open class SymbolParser: SyntaxVisitor {
     }
     
     open override func visitPost(_ node: VariableDeclSyntax) {
-        var isStatic = false
-        
-        // Examine this variables modifiers to figure out whether it's static
-        for modifier in node.modifiers {
-            let modifierText = modifier.name.text
-            
-            if modifierText == "static" || modifierText == "class" {
-                isStatic = true
-            }
-        }
         
         let letOrVar: Hatch.Variable.LetOrVar
         switch node.bindingSpecifier.text {
@@ -198,16 +201,20 @@ open class SymbolParser: SyntaxVisitor {
             letOrVar = .let
         }
         
+        
         if let binding = node.bindings.first {
             
+            let trimmedType = binding.typeAnnotation?.type.trimmed.description
+            print("&& \(node.attributes.map({ $0.trimmedDescription }))")
             endScopeAndAddSymbol { children in
                 let newObject = Variable(
                     name: binding.pattern.description,
                     children: children,
                     comments: comments(node.leadingTrivia),
-                    isStatic: isStatic,
+                    modifiers: node.modifiers.map({ $0.name.text }),
+                    attributes: node.attributes.map({ $0.trimmedDescription }),
                     letOrVar: letOrVar,
-                    typeAnnotation: binding.typeAnnotation?.type.description,
+                    typeAnnotation: trimmedType,
                     identifierExpression: nil,
                     initializer: binding.initializer?.value.description,
                     sourceRange: node.sourceRange(converter: sourceLocationConverter)
@@ -282,28 +289,19 @@ open class SymbolParser: SyntaxVisitor {
     
     /// Triggered on exiting a function; moves back up the tree
     open override func visitPost(_ node: FunctionDeclSyntax) {
-        var throwingStatus = Function.ThrowingStatus.unknown
-        var isStatic = false
+        var throwingStatus = ThrowingStatus.unknown
         var returnType = ""
-        
-        // Examine this function's modifiers to figure out whether it's static
-        for modifier in node.modifiers {
-            let modifierText = modifier.name.text
-            
-            if modifierText == "static" || modifierText == "class" {
-                isStatic = true
-            }
-        }
         
         // Copy in the throwing status
         if let throwsKeyword = node.signature.effectSpecifiers?.throwsSpecifier {
-            if let throwsOrRethrows = Function.ThrowingStatus(rawValue: throwsKeyword.description) {
+            if let throwsOrRethrows = ThrowingStatus(rawValue: throwsKeyword.description) {
                 //print("&& imma let you throw")
                 throwingStatus = throwsOrRethrows
             }
-       } else {
+        } else {
             throwingStatus = .none
         }
+        
         
         let name = node.name.text
         
@@ -314,6 +312,7 @@ open class SymbolParser: SyntaxVisitor {
                     firstName: child.firstName.text,
                     secondName: child.secondName?.text,
                     type: child.type.description,
+                    initializerClause: child.defaultValue?.trimmedDescription,
                     children: [],
                     comments: comments(node.leadingTrivia),
                     sourceRange: node.sourceRange(converter: sourceLocationConverter)
@@ -330,11 +329,12 @@ open class SymbolParser: SyntaxVisitor {
             let newObject = Function(
                 name: name,
                 parameters: parameters,
-                isStatic: isStatic,
                 throwingStatus: throwingStatus,
                 returnType: returnType,
                 children: children,
                 comments: comments(node.leadingTrivia),
+                modifiers: node.modifiers.map({ $0.name.text }),
+                attributes: node.attributes.map({ $0.trimmedDescription }),
                 sourceRange: node.sourceRange(converter: sourceLocationConverter)
             )
             return newObject
@@ -349,6 +349,7 @@ open class SymbolParser: SyntaxVisitor {
                 firstName: node.firstName.text,
                 secondName: node.secondName?.text,
                 type: node.type.description,
+                initializerClause: node.defaultValue?.trimmedDescription,
                 children: children,
                 comments: comments(node.leadingTrivia),
                 sourceRange: node.sourceRange(converter: sourceLocationConverter)
@@ -356,6 +357,80 @@ open class SymbolParser: SyntaxVisitor {
             return newObject
         }
         
+    }
+    
+    /// Visiting ``InitializerDeclSyntax`` specifically.
+    open override func visit(_ node: InitializerDeclSyntax) -> SyntaxVisitorContinueKind {
+        startScope()
+    }
+    
+    /// The function called after visiting ``InitializerDeclSyntax`` and its descendants.
+    open override func visitPost(_ node: InitializerDeclSyntax) {
+        var throwingStatus = ThrowingStatus.unknown
+        var returnType = ""
+        
+        // Copy in the throwing status
+        if let throwsKeyword = node.signature.effectSpecifiers?.throwsSpecifier {
+            if let throwsOrRethrows = ThrowingStatus(rawValue: throwsKeyword.description) {
+                throwingStatus = throwsOrRethrows
+            }
+        } else {
+            throwingStatus = .none
+        }
+        
+        
+        // Flatten the list of parameters for easier storage
+        let parameters = node.signature.parameterClause.parameters
+            .compactMap { child in
+                                
+                return FunctionParameter(
+                    firstName: child.firstName.text,
+                    secondName: child.secondName?.text,
+                    type: child.type.description,
+                    initializerClause: child.defaultValue?.trimmedDescription,
+                    children: [],
+                    comments: comments(node.leadingTrivia),
+                    sourceRange: node.sourceRange(converter: sourceLocationConverter)
+                )
+                
+            }
+                
+        // If we have a return type, copy it here
+        if let nodeReturnType = node.signature.returnClause?.type {
+            returnType = "\(nodeReturnType)"
+        }
+        
+        endScopeAndAddSymbol { children in
+            let newObject = Function(
+                name: "init",
+                parameters: parameters,
+                throwingStatus: throwingStatus,
+                returnType: returnType,
+                children: children,
+                comments: comments(node.leadingTrivia),
+                modifiers: node.modifiers.map({ $0.name.text }),
+                attributes: node.attributes.map({ $0.trimmedDescription }),
+                isInitializer: true,
+                sourceRange: node.sourceRange(converter: sourceLocationConverter)
+            )
+            return newObject
+        }
+    }
+    
+    
+    open override func visit(_ node: InitializerClauseSyntax) -> SyntaxVisitorContinueKind {
+        startScope()
+    }
+    
+    open override func visitPost(_ node: InitializerClauseSyntax) {
+        endScopeAndAddSymbol { children in
+            let newobject = InitClause(
+                name: node.trimmedDescription,
+                children: children,
+                sourceRange: node.sourceRange(converter: sourceLocationConverter)
+            )
+            return newobject
+        }
     }
 
 }
