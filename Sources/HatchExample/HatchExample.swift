@@ -5,7 +5,9 @@ import SwiftSyntax
 @main
 public struct ExampleApp {
     public static func main() throws {
-        
+
+        // MARK: - Example of parsing a string
+
         let source = """
         
         struct A1 {
@@ -35,7 +37,9 @@ public struct ExampleApp {
             .compactMap { $0 as? InheritingSymbol }
         
         dump(symbols)
-        
+
+        // MARK: - Example of parsing from the file system
+
         let path = "~/Repositories/myProject" as NSString
         let directoryURL = URL(fileURLWithPath: path.expandingTildeInPath)
         
@@ -47,7 +51,9 @@ public struct ExampleApp {
             .flatMap { try SymbolParser.parse(fileName: "example.swift", source: String(contentsOf: $0)) }
         
         dump(allSymbols)
-        
+
+        // MARK: - Example of StringBuilder
+
         @StringBuilder var output: String {
             """
             let a = 10
